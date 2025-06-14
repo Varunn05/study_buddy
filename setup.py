@@ -43,12 +43,10 @@ class Config:
 
 app = FastAPI(title="PDF Q&A Assistant", version="1.0.0")
 
-# Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Pydantic models
 class ChatRequest(BaseModel):
     message: str
 
@@ -76,7 +74,6 @@ def init_db():
     with get_db() as conn:
         cursor = conn.cursor()
         
-        # PDF content table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS pdf_content (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -86,7 +83,6 @@ def init_db():
             chunk_count INTEGER DEFAULT 0
         )''')
         
-        # Chat history table
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS chat_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -138,10 +134,8 @@ class LLMService:
     def create_vectorstore(self, documents: List[Document]) -> int:
         """Create or update vector store from documents"""
         try:
-            # Create vector store
             self.vectorstore = FAISS.from_documents(documents, self.embeddings)
             
-            # Save vector store
             os.makedirs(os.path.dirname(Config.VECTOR_STORE_PATH), exist_ok=True)
             self.vectorstore.save_local(Config.VECTOR_STORE_PATH)
             
@@ -242,10 +236,8 @@ class ConnectionManager:
                 "question": question,
                 "answer": answer
             })
-            # Keep only last N exchanges
             self.session_contexts[session_id] = self.session_contexts[session_id][-Config.MAX_CONVERSATION_HISTORY:]
 
-# Initialize services
 llm_service = LLMService()
 manager = ConnectionManager()
 
@@ -282,7 +274,6 @@ def create_document_chunks(text: str, filename: str) -> List[Document]:
     
     return documents
 
-# API Routes
 @app.on_event("startup")
 async def startup_event():
     """Initialize database and load existing vector store"""
@@ -298,30 +289,24 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
     if not file.filename.lower().endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed")
     
-    # Save uploaded file temporarily
     temp_path = f"temp_{file.filename}"
     try:
         with open(temp_path, "wb") as buffer:
             content = await file.read()
             buffer.write(content)
         
-        # Extract text from PDF
         with open(temp_path, "rb") as pdf_file:
             extracted_text = extract_text_from_pdf(pdf_file)
         
         if not extracted_text:
             raise HTTPException(status_code=400, detail="No text could be extracted from PDF")
         
-        # Create document chunks
         documents = create_document_chunks(extracted_text, file.filename)
         
-        # Create vector store
         chunk_count = llm_service.create_vectorstore(documents)
         
-        # Setup QA chain
         llm_service.setup_qa_chain()
         
-        # Store in database
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -340,7 +325,6 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
         logger.error(f"Error processing PDF upload: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        # Clean up temporary file
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
@@ -352,10 +336,8 @@ async def chat(request: Request, chat_request: ChatRequest):
         raise HTTPException(status_code=404, detail="No PDF content found. Please upload a PDF first.")
     
     try:
-        # Get answer from QA chain
         result = llm_service.get_answer(chat_request.message)
         
-        # Store chat history
         with get_db() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -391,17 +373,13 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             try:
-                # Receive message with timeout
                 message = await asyncio.wait_for(websocket.receive_text(), timeout=300.0)
                 
-                # Get answer from QA chain
                 result = llm_service.get_answer(message)
                 answer = result["answer"]
                 
-                # Update session context
                 manager.update_session_context(session_id, message, answer)
                 
-                # Store in database
                 with get_db() as conn:
                     cursor = conn.cursor()
                     cursor.execute(
@@ -415,7 +393,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     )
                     conn.commit()
                 
-                # Send response
                 await websocket.send_text(json.dumps({
                     "answer": answer,
                     "sources": result["sources"],

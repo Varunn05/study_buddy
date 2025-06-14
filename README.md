@@ -5,10 +5,10 @@ A PDF-based question-answering system that helps students study by allowing them
 ## Screenshots
 
 ### Main Interface
-![Upload Interface](https://drive.google.com/drive/folders/1r9NuxcchOnsFtU_j1t3VtjeH9fZ4axT6)
+![Upload Interface](https://drive.google.com/file/d/1H28GLOVI7XJl-7bXJRUOv-gYwnAJ46Rc/view?usp=sharing)
 
 ### Chat Interface
-![Chat Interface](https://drive.google.com/drive/folders/1r9NuxcchOnsFtU_j1t3VtjeH9fZ4axT6)
+![Chat Interface](https://drive.google.com/file/d/1pKQwUqe-izLfvm9tIxBCBKSrk_SicMiY/view?usp=sharing)
 
 ## Features
 

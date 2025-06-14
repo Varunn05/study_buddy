@@ -2,6 +2,14 @@
 
 A PDF-based question-answering system that helps students study by allowing them to upload their notes and ask questions interactively. Built with FastAPI backend and Streamlit frontend.
 
+## Screenshots
+
+### Main Interface
+![Upload Interface](https://drive.google.com/drive/folders/1r9NuxcchOnsFtU_j1t3VtjeH9fZ4axT6)
+
+### Chat Interface
+![Chat Interface](https://drive.google.com/drive/folders/1r9NuxcchOnsFtU_j1t3VtjeH9fZ4axT6)
+
 ## Features
 
 - Upload PDF documents containing study notes
@@ -12,6 +20,8 @@ A PDF-based question-answering system that helps students study by allowing them
 - SQLite database for persistence
 
 ## Architecture
+
+![System Architecture](images/architecture-diagram.png)
 
 The system consists of two main components:
 
@@ -76,23 +86,23 @@ docker run -p 8501:8501 -p 9999:9999 study-buddy
 
 ## Usage Guide
 
-1. **Start the Application**
-   - Ensure the backend is running on `http://localhost:9999`
-   - Access the Streamlit frontend at `http://localhost:8501`
+### 1. Upload PDF Notes
+![PDF Upload Process](images/upload-process.png)
 
-2. **Upload PDF Notes**
-   - Click "Browse files" to select your PDF study notes
-   - Click "Upload PDF" to process the document
-   - Wait for confirmation message showing text length
+- Click "Browse files" to select your PDF study notes
+- Click "Upload PDF" to process the document
+- Wait for confirmation message showing text length
 
-3. **Ask Questions**
-   - Type your question in the chat input field
-   - The system will search through your uploaded notes
-   - Receive detailed answers based on the document content
+### 2. Ask Questions
+![Chat Example](images/chat-example.png)
 
-4. **Chat History**
-   - All conversations are saved and displayed in the chat interface
-   - Session state maintains conversation context
+- Type your question in the chat input field
+- The system will search through your uploaded notes
+- Receive detailed answers based on the document content
+
+### 3. Chat History
+- All conversations are saved and displayed in the chat interface
+- Session state maintains conversation context
 
 ## API Reference
 
